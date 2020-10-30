@@ -3,10 +3,16 @@
   "version": "1.0.0",
   "main": "index.js",
   "repository": "https://github.com/sxy1992/qcc.git",
-  "author": "sunxueyuan <sunxueyuan@auteltech.net>",
+  "author": "sxy1992",
   "license": "MIT",
-  "bin": "./bin/baseCli.js",
+  "bin": {
+    "qcc": "./bin/baseCli.js"
+  },
   "dependencies": {
-    "commander": "^6.2.0"
+    "cfonts": "^2.8.6",
+    "chalk": "^4.1.0",
+    "commander": "^6.2.0",
+    "glob": "^7.1.6",
+    "inquirer": "^7.3.3"
   }
 }
