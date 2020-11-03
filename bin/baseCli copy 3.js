@@ -18,85 +18,79 @@ if (!projectName) return program.help()
 
 const list = glob.sync('*')                      // 遍历当前文件夹下的文件
 let rootName = path.basename(process.cwd())    // 获取当前文件夹的名称
-let next = undefined
+let next = null
 console.log(11)
-if (list.length) {
-    const hasProject = list.some(e => {          // 判断在当前文件夹中是否有和项目名一致的文件夹
-        const fileName = path.resolve(process.cwd(), e)
-        return projectName === e && fs.statSync(fileName).isDirectory()
-    })
+run()
+console.log(16)
+async function run() {
     console.log(12)
-    if (hasProject) {
+    if (list.length) {
+        const hasProject = list.some(e => {          // 判断在当前文件夹中是否有和项目名一致的文件夹
+            const fileName = path.resolve(process.cwd(), e)
+            return projectName === e && fs.statSync(fileName).isDirectory()
+        })
         console.log(13)
-        const list = [{
-            name: 'cover',
-            message: `项目${projectName}已经存在，是否覆盖？`,
-            type: 'confirm',
-            prefix: '⚙️',
-            default: true
-        }]
-        console.log(14)
-        next = inquirer.prompt(list).then(({ cover }) => {
+        if (hasProject) {
+            console.log(14)
+            const list = [{
+                name: 'cover',
+                message: `项目${projectName}已经存在，是否覆盖？`,
+                type: 'confirm',
+                prefix: '⚙️',
+                default: true
+            }]
+            console.log(15)
+            const { cover } = await inquirer.prompt(list)
             console.log(21)
             if (cover) {
-                return Promise.resolve(projectName);
+                console.log('remove')
+                // rootName = projectName;
+                next = Promise.resolve(projectName);
             } else {
-                next = undefined
                 console.log('停止创建')
             }
-            console.log(22)
-        })
+        } else if (projectName === rootName) {
+            const list = [{
+                name: 'buildCurrent',
+                message: '当前文件名称和项目名称一致，是否直接创建项目？',
+                type: 'confirm',
+                default: true
+            }]
+            const { buildCurrent } = await inquirer.prompt(list)
+            if (buildCurrent) {
+                console.log('remove self')
+                // rootName = projectName;
+                next = Promise.resolve(projectName);
+            } else {
+                console.log('停止创建')
+            }
+        } else {
+            next = Promise.resolve(projectName);
+        }
     } else if (projectName === rootName) {
-        console.log(15)
         const list = [{
             name: 'buildCurrent',
             message: '当前文件名称和项目名称一致，是否直接创建项目？',
             type: 'confirm',
             default: true
         }]
-        next = inquirer.prompt(list).then(({ buildCurrent }) => {
-            console.log(23)
-            if (buildCurrent) {
-                return Promise.resolve(projectName);
-            } else {
-                next = undefined
-                console.log('停止创建')
-            }
-            console.log(24)
-        })
-        console.log(16)
-    } else {
-        console.log(17)
-        next = Promise.resolve(projectName);
-    }
-} else if (projectName === rootName) {
-    console.log(18)
-    const list = [{
-        name: 'buildCurrent',
-        message: '当前文件名称和项目名称一致，是否直接创建项目？',
-        type: 'confirm',
-        default: true
-    }]
-    next = inquirer.prompt(list).then(({ buildCurrent }) => {
-        console.log(25)
+        const { buildCurrent } = await inquirer.prompt(list)
         if (buildCurrent) {
-            return Promise.resolve(projectName);
+            console.log('remove self')
+            rootName = projectName;
+            next = Promise.resolve(projectName);
         } else {
-            next = undefined
             console.log('停止创建')
         }
-        console.log(26)
-    })
-    console.log(19)
-} else {
-    console.log(110)
-    next = Promise.resolve(projectName);
-    console.log(111)
+    } else {
+        next = Promise.resolve(projectName);
+    }
 }
-console.log(112)
-next && build()
+console.log(17, next)
+build()
+console.log(8, next)
 function build() {
-    console.log(113)
+    console.log(18)
     next.then(async e => {
         console.log(31, next)
         if (!e) return
