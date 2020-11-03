@@ -19,6 +19,7 @@ if (!projectName) return program.help()
 const list = glob.sync('*')                      // 遍历当前文件夹下的文件
 let rootName = path.basename(process.cwd())    // 获取当前文件夹的名称
 let next = undefined
+let createType = 1;
 console.log(11)
 if (list.length) {
     const hasProject = list.some(e => {          // 判断在当前文件夹中是否有和项目名一致的文件夹
@@ -39,6 +40,7 @@ if (list.length) {
         next = inquirer.prompt(list).then(({ cover }) => {
             console.log(21)
             if (cover) {
+                createType = 2
                 return Promise.resolve(projectName);
             } else {
                 next = undefined
@@ -57,6 +59,7 @@ if (list.length) {
         next = inquirer.prompt(list).then(({ buildCurrent }) => {
             console.log(23)
             if (buildCurrent) {
+                createType = 3
                 return Promise.resolve(projectName);
             } else {
                 next = undefined
@@ -80,6 +83,7 @@ if (list.length) {
     next = inquirer.prompt(list).then(({ buildCurrent }) => {
         console.log(25)
         if (buildCurrent) {
+            createType = 4
             return Promise.resolve(projectName);
         } else {
             next = undefined
@@ -177,7 +181,104 @@ function build() {
                 return val.toLowerCase();
             }
         }])
-        fs.mkdirSync(e)
         console.log('temp', tempObj[frame])
+        const spinner = ora('downloading template...')
+
+        const downloadObj = list.find(e => { return e.value === tempObj[frame] })
+        const downloadPath = `direct:${downloadObj.url}#${downloadObj.branch}`
+        switch (createType) {
+            case 2: // 覆盖项目
+                let files = fs.readdirSync(e)
+                for (var i = 0; i < files.length; i++) {
+                    let newPath = path.join(e, files[i]);
+                    let stat = fs.statSync(newPath)
+                    if (stat.isDirectory()) {
+                        //如果是文件夹就递归下去
+                        removeDir(newPath);
+                    } else {
+                        //删除文件
+                        fs.unlinkSync(newPath);
+                    }
+                }
+                spinner.start()
+                download(downloadPath, e, { clone: true }, (err) => {
+                    if (err) {
+                        spinner.fail()
+                        console.error(err,
+                            chalk.red(`${err}download template fail,please check your network connection and try again`))
+                        process.exit(1)
+                    }
+                    spinner.succeed()
+                })
+                break;
+            case 3: // 项目名和文件夹名一致，且为非空文件夹
+                console.log(3, e)
+                removeDir(`./`)
+                // spinner.start()
+                // download(downloadPath, e, { clone: true }, (err) => {
+                //     if (err) {
+                //         spinner.fail()
+                //         console.error(err,
+                //             chalk.red(`${err}download template fail,please check your network connection and try again`))
+                //         process.exit(1)
+                //     }
+                //     spinner.succeed()
+                // })
+                break;
+            case 4: // 项目名和文件夹名一致，且为空文件夹
+                console.log(4, e)
+                fs.rmdirSync(e)
+                // spinner.start()
+                // download(downloadPath, e, { clone: true }, (err) => {
+                //     if (err) {
+                //         spinner.fail()
+                //         console.error(err,
+                //             chalk.red(`${err}download template fail,please check your network connection and try again`))
+                //         process.exit(1)
+                //     }
+                //     spinner.succeed()
+                // })
+                break;
+            default:
+                // fs.mkdirSync(e)
+                console.log(1, e)
+                spinner.start()
+                download(downloadPath, e, { clone: true }, (err) => {
+                    if (err) {
+                        spinner.fail()
+                        console.error(err,
+                            chalk.red(`${err}download template fail,please check your network connection and try again`))
+                        process.exit(1)
+                    }
+                    spinner.succeed()
+                })
+                break;
+        }
+        CFonts.say('loading', {
+            font: 'block',
+            align: 'left',
+            colors: ['#f80'],
+            background: 'transparent',
+            letterSpacing: 1,
+            lineHeight: 1,
+            space: true,
+            maxLength: '0',
+        });
     })
+}
+
+function removeDir(dir) {
+    let files = fs.readdirSync(dir)
+    for (var i = 0; i < files.length; i++) {
+        let newPath = path.join(dir, files[i]);
+        let stat = fs.statSync(newPath)
+        if (stat.isDirectory()) {
+            //如果是文件夹就递归下去
+            removeDir(newPath);
+        } else {
+            //删除文件
+            fs.unlinkSync(newPath);
+        }
+    }
+    fs.rmdirSync(dir)//如果文件夹是空的，就将自己删除掉
 }

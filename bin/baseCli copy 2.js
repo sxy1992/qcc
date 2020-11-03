@@ -19,16 +19,16 @@ if (!projectName) return program.help()
 const list = glob.sync('*')                      // 遍历当前文件夹下的文件
 let rootName = path.basename(process.cwd())    // 获取当前文件夹的名称
 let next = null
-CFonts.say('loading', {
-    font: 'block',
-    align: 'left',
-    colors: ['#f80'],
-    background: 'transparent',
-    letterSpacing: 1,
-    lineHeight: 1,
-    space: true,
-    maxLength: '0',
-});
+// CFonts.say('loading', {
+//     font: 'block',
+//     align: 'left',
+//     colors: ['#f80'],
+//     background: 'transparent',
+//     letterSpacing: 1,
+//     lineHeight: 1,
+//     space: true,
+//     maxLength: '0',
+// });
 if (list.length) {
     const hasProject = list.some(e => {          // 判断在当前文件夹中是否有和项目名一致的文件夹
         const fileName = path.resolve(process.cwd(), e)
