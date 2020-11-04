@@ -20,12 +20,15 @@ const fileList = glob.sync('*')                      // 遍历当前文件夹下
 let rootName = path.basename(process.cwd())    // 获取当前文件夹的名称
 let next = undefined
 let createType = 1;
+console.log(11)
 if (fileList.length) {
     const hasProject = fileList.some(e => {          // 判断在当前文件夹中是否有和项目名一致的文件夹
         const fileName = path.resolve(process.cwd(), e)
         return projectName === e && fs.statSync(fileName).isDirectory()
     })
+    console.log(12)
     if (hasProject) {
+        console.log(13)
         const list = [{
             name: 'cover',
             message: `项目${projectName}已经存在，是否覆盖？`,
@@ -33,15 +36,20 @@ if (fileList.length) {
             prefix: '⚙️',
             default: true
         }]
+        console.log(14)
         next = inquirer.prompt(list).then(({ cover }) => {
+            console.log(21)
             if (cover) {
                 createType = 2
                 return Promise.resolve(projectName);
             } else {
                 next = undefined
+                console.log('停止创建')
             }
+            console.log(22)
         })
     } else if (projectName === rootName) {
+        console.log(15)
         const list = [{
             name: 'buildCurrent',
             message: '当前文件名称和项目名称一致，是否直接创建项目？',
@@ -49,17 +57,23 @@ if (fileList.length) {
             default: true
         }]
         next = inquirer.prompt(list).then(({ buildCurrent }) => {
+            console.log(23)
             if (buildCurrent) {
                 createType = 3
-                return Promise.resolve('.');
+                return Promise.resolve(projectName);
             } else {
                 next = undefined
+                console.log('停止创建')
             }
+            console.log(24)
         })
+        console.log(16)
     } else {
+        console.log(17)
         next = Promise.resolve(projectName);
     }
 } else if (projectName === rootName) {
+    console.log(18)
     const list = [{
         name: 'buildCurrent',
         message: '当前文件名称和项目名称一致，是否直接创建项目？',
@@ -67,19 +81,28 @@ if (fileList.length) {
         default: true
     }]
     next = inquirer.prompt(list).then(({ buildCurrent }) => {
+        console.log(25)
         if (buildCurrent) {
             createType = 4
-            return Promise.resolve('.');
+            return Promise.resolve(projectName);
         } else {
             next = undefined
+            console.log('停止创建')
         }
+        console.log(26)
     })
+    console.log(19)
 } else {
+    console.log(110)
     next = Promise.resolve(projectName);
+    console.log(111)
 }
+console.log(112)
 next && build()
 function build() {
+    console.log(113)
     next.then(async e => {
+        console.log(31, next)
         if (!e) return
         const frameList = [{
             type: 'list',
@@ -158,19 +181,73 @@ function build() {
                 return val.toLowerCase();
             }
         }])
+        console.log('temp', tempObj[frame])
+        const spinner = ora('downloading template...')
+
         const downloadObj = downloadList.find(k => { return k.value === tempObj[frame] })
         const downloadPath = `direct:${downloadObj.url}#${downloadObj.branch}`
-        if (createType === 2) {
-            removeDir(e)
-        } else if (createType === 3) {
-            try {
-                removeDir(path.resolve(process.cwd()))
-            } catch (err) {
+        switch (createType) {
+            case 2: // 覆盖项目
+                removeDir(e)
+                spinner.start()
+                download(downloadPath, e, { clone: true }, (err) => {
+                    if (err) {
+                        spinner.fail()
+                        console.error(err,
+                            chalk.red(`${err}download template fail,please check your network connection and try again`))
+                        process.exit(1)
+                    }
+                    spinner.succeed()
+                })
+                break;
+            case 3: // 项目名和文件夹名一致，且为非空文件夹
+                console.log(3, e)
+                console.log(fileList)
+                console.log(path.resolve(process.cwd(), '../', e))
+                removeDir(path.resolve(process.cwd(), '../', e))
+                // spinner.start()
+                // download(downloadPath, e, { clone: true }, (err) => {
+                //     if (err) {
+                //         spinner.fail()
+                //         console.error(err,
+                //             chalk.red(`${err}download template fail,please check your network connection and try again`))
+                //         process.exit(1)
+                //     }
+                //     spinner.succeed()
+                // })
+                break;
+            case 4: // 项目名和文件夹名一致，且为空文件夹
+                console.log(4, e)
+                console.log(fileList)
+                console.log(path.resolve(process.cwd(), '../', e))
 
-            }
+                // removeDir()
+                // spinner.start()
+                // download(downloadPath, e, { clone: true }, (err) => {
+                //     if (err) {
+                //         spinner.fail()
+                //         console.error(err,
+                //             chalk.red(`${err}download template fail,please check your network connection and try again`))
+                //         process.exit(1)
+                //     }
+                //     spinner.succeed()
+                // })
+                break;
+            default:
+                // fs.mkdirSync(e)
+                console.log(1, e)
+                spinner.start()
+                download(downloadPath, e, { clone: true }, (err) => {
+                    if (err) {
+                        spinner.fail()
+                        console.error(err,
+                            chalk.red(`${err}download template fail,please check your network connection and try again`))
+                        process.exit(1)
+                    }
+                    spinner.succeed()
+                })
+                break;
         }
-        downLoadTemplate(downloadPath, e)
-
         CFonts.say('loading', {
             font: 'block',
             align: 'left',
@@ -197,19 +274,5 @@ function removeDir(dir) {
             fs.unlinkSync(newPath);
         }
     }
-    fs.rmdirSync(dir) //如果文件夹是空的，就将自己删除掉
-}
-
-function downLoadTemplate(path, pro) {
-    const spinner = ora('模板下载中...')
-    spinner.start()
-    download(path, pro, { clone: true }, (err) => {
-        if (err) {
-            spinner.fail()
-            console.error(err,
-                chalk.red(`${err}download template fail,please check your network connection and try again`))
-            process.exit(1)
-        }
-        spinner.succeed()
-    })
+    fs.rmdirSync(dir)//如果文件夹是空的，就将自己删除掉
 }
