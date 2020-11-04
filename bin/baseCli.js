@@ -99,30 +99,30 @@ function build() {
             {
                 key: 1,
                 frame: 'vue',
-                name: 'Ant-Design + JSX 版本 + Vue3.0',
+                name: 'Ant-Design + JSX 版本',
                 value: 'vue1',
-                url: 'https://github.com/LuckyWinty/create-repo-cli.git',
+                url: 'https://github.com/sxy1992/antd-jsx.git',
                 branch: 'master'
             }, {
                 key: 2,
                 frame: 'vue',
                 name: 'Ant-Design + Vue2.5x 稳定版本',
                 value: 'vue2',
-                url: 'https://github.com/LuckyWinty/create-repo-cli.git',
-                branch: 'master'
+                url: 'https://github.com/sxy1992/qcc.git',
+                branch: 'main'
             }, {
                 key: 3,
                 frame: 'vue',
-                name: 'Element-UI + Vue2.5x',
+                name: 'Ant-Design + Vue3.0版本',
                 value: 'vue3',
-                url: 'https://github.com/LuckyWinty/create-repo-cli.git',
-                branch: 'master'
+                url: 'https://github.com/vueComponent/ant-design-vue.git',
+                branch: 'next'
             }, {
                 key: 4,
                 frame: 'react',
-                name: 'react111',
+                name: 'Ant-Design + React',
                 value: 'react1',
-                url: 'https://github.com/LuckyWinty/create-repo-cli.git',
+                url: 'https://github.com/ant-design/ant-design.git',
                 branch: 'master'
             }, {
                 key: 5,
